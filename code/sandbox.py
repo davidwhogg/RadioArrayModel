@@ -33,25 +33,20 @@ def black_body(nus, T):
     return (2. * hh * nus ** 3 / cc ** 2 /
             (np.exp(hh * nus / (kk * T)) - 1.))
 
-def sample_frequency(nu, deltaNu, K):
+def make_signal(nu, deltaNu, T, K):
     """
-    Obtain a set of `K` frequencies in the waveband of width `deltaNu`
-    centered at frequency `nu`.  They are drawn from a uniform
-    distribution in *frequency*.
+    Obtain a set of `K` frequencies and corresponding complex
+    amplitudes, given a temperature `T`.  The frequencies are chosen
+    from a uniform distribution of of width `deltaNu` centered at
+    frequency `nu`.  They are drawn from a uniform distribution in
+    *frequency*.  The amplitudes are chosen from a distribution such
+    that the mean squared amplitude is the intensity as given by the
+    Planck Law at temperature `T`.
     """
-    return nu - 0.5 * deltaNu + deltaNu * np.random.uniform(size=K)
-
-def sample_amplitudes(nus, T):
-    """
-    Obtain a set of `K` complex amplitudes, one for each frequency in
-    `nus` given a temperature.  The amplitudes are chosen from a
-    distribution such that the mean squared amplitude is the intensity
-    as given by the Planck Law at temperature `T`.
-    """
-    K = nus.size
-    intensities = black_body(nus, T)
+    nus = nu - 0.5 * deltaNu + deltaNu * np.random.uniform(size=K)
+    intensities = black_body(nus, T) * deltaNu / K
     unitAmplitudes = 0.5 * (np.random.normal(size=K) + 1.j * np.random.normal(size=K))
-    return np.sqrt(intensities) * unitAmplitudes
+    return nus, np.sqrt(intensities) * unitAmplitudes
 
 def get_amplitudes_at_times(times, nus, amps):
     """
@@ -62,7 +57,12 @@ def get_amplitudes_at_times(times, nus, amps):
     return np.sum(amps[None, :] * phaseFactors, axis=1)
 
 def delay_amplitudes(delay, nus, amps):
-    return amps
+    """
+    Delay a set of complex amplitudes `amps` at a set of frequencies
+    `nus` by a fixed time delay `delay`.
+    """
+    phaseFactors = np.exp(-1.j * 2. * np.pi * nus * delay)
+    return amps * phaseFactors
 
 def get_correlations_at_times(times, nus, amps1, amps2):
     """
@@ -74,12 +74,10 @@ def get_correlations_at_times(times, nus, amps1, amps2):
 
 def main(prefix):
     nu0 = 1.e9
-    dnu = 1.e9
-    nus = sample_frequency(nu0, dnu, 100)
+    dnu = 5.e7
+    nus, amps = make_signal(nu0, dnu, 2.7e10, 100)
     print "nus", nus.shape
-    amps = sample_amplitudes(nus, 2.7e10)
     print "amps", amps.shape
-    print amps
     dt = 0.1 / nu0
     times = 0.5 * dt + dt * np.arange(10000)
     t0 = 0.
@@ -100,7 +98,10 @@ def main(prefix):
         else:
             plt.xlim(t0, t2)
     plt.savefig(prefix + "fields.png")
-    Inus = get_correlations_at_times(times, nus, amps, amps)
+    delay = 10. * nu0 * np.random.uniform()
+    amps2 = delay_amplitudes(delay, nus, amps)
+    print "amps2", amps2.shape
+    Inus = get_correlations_at_times(times, nus, amps, amps2)
     print "intensities", fields.shape
     plt.clf()
     for s in (1,2):
