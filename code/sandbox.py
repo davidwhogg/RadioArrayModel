@@ -61,9 +61,15 @@ def get_amplitudes_at_times(times, nus, amps):
     phases = np.exp(-1.j * 2. * np.pi * nus[None, :] * times[:, None])
     return np.sum(amps[None, :] * phases, axis=1)
 
-def get_intensities_at_times(times, nus, amps):
-    amps = get_amplitudes_at_times(times, nus, amps)
-    return np.real(amps) ** 2 + np.imag(amps) ** 2
+def delay_amplitudes(delay, nus, amps):
+    return amps
+
+def get_correlations_at_times(times, nus, amps1, amps2):
+    """
+    Correlate two signals (represented by a set of complex amplitudes
+    `amps` at a common set of frequencies `nus`.
+    """
+    return get_amplitudes_at_times(times, nus, amps1) * get_amplitudes_at_times(times, nus, amps2)
 
 def main(prefix):
     nu0 = 1.e9
@@ -81,21 +87,24 @@ def main(prefix):
     fields = get_amplitudes_at_times(times, nus, amps)
     print "fields", fields.shape
     plt.clf()
+    real_kwargs = {"lw": 1., "alpha": 1.}
+    imag_kwargs = {"lw": 2., "alpha": 0.5}
     for s in (1,2):
         plt.subplot(1,2,s)
-        plt.plot(times, np.real(fields), "k-")
-        plt.plot(times, np.imag(fields), "k-")
+        plt.plot(times, np.real(fields), "k-", **real_kwargs)
+        plt.plot(times, np.imag(fields), "k-", **imag_kwargs)
         if s == 1:
             plt.xlim(t0, t1)
         else:
             plt.xlim(t0, t2)
     plt.savefig(prefix + "fields.png")
-    Inus = get_intensities_at_times(times, nus, amps)
+    Inus = get_correlations_at_times(times, nus, amps, amps)
     print "intensities", fields.shape
     plt.clf()
     for s in (1,2):
         plt.subplot(1,2,s)
-        plt.plot(times, Inus, "k-")
+        plt.plot(times, np.real(Inus), "k-", **real_kwargs)
+        plt.plot(times, np.imag(Inus), "k-", **imag_kwargs)
         if s == 1:
             plt.xlim(t0, t1)
         else:
