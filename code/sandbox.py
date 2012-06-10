@@ -58,8 +58,8 @@ def get_amplitudes_at_times(times, nus, amps):
     Run the clock forward to a set of times and return the complex
     amplitudes at those times.
     """
-    phases = np.exp(-1.j * 2. * np.pi * nus[None, :] * times[:, None])
-    return np.sum(amps[None, :] * phases, axis=1)
+    phaseFactors = np.exp(-1.j * 2. * np.pi * nus[None, :] * times[:, None])
+    return np.sum(amps[None, :] * phaseFactors, axis=1)
 
 def delay_amplitudes(delay, nus, amps):
     return amps
@@ -67,17 +67,19 @@ def delay_amplitudes(delay, nus, amps):
 def get_correlations_at_times(times, nus, amps1, amps2):
     """
     Correlate two signals (represented by a set of complex amplitudes
-    `amps` at a common set of frequencies `nus`.
+    `amps1` and `amps2` at a common set of frequencies `nus`.  Give
+    the output on a grid of times `times`.
     """
-    return get_amplitudes_at_times(times, nus, amps1) * get_amplitudes_at_times(times, nus, amps2)
+    return get_amplitudes_at_times(times, nus, amps1) * np.conj(get_amplitudes_at_times(times, nus, amps2))
 
 def main(prefix):
     nu0 = 1.e9
-    dnu = 1.e8
+    dnu = 1.e9
     nus = sample_frequency(nu0, dnu, 100)
     print "nus", nus.shape
     amps = sample_amplitudes(nus, 2.7e10)
     print "amps", amps.shape
+    print amps
     dt = 0.1 / nu0
     times = 0.5 * dt + dt * np.arange(10000)
     t0 = 0.
@@ -103,8 +105,10 @@ def main(prefix):
     plt.clf()
     for s in (1,2):
         plt.subplot(1,2,s)
-        plt.plot(times, np.real(Inus), "k-", **real_kwargs)
-        plt.plot(times, np.imag(Inus), "k-", **imag_kwargs)
+        plt.plot(times, np.real(Inus), "k-", zorder=0, **real_kwargs)
+        plt.plot(times, np.imag(Inus), "k-", zorder=0, **imag_kwargs)
+        plt.plot(times, np.zeros_like(times) + np.mean(np.real(Inus)), "r-", zorder=1, **real_kwargs)
+        plt.plot(times, np.zeros_like(times) + np.mean(np.imag(Inus)), "r-", zorder=1, **imag_kwargs)
         if s == 1:
             plt.xlim(t0, t1)
         else:
