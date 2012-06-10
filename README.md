@@ -4,7 +4,7 @@ A playground to explore the probabilistic and inference properties of radio inte
 
 ### Authors: ###
 
-* (David W. Hogg)[http://cosmo.nyu.edu/hogg/], New York University
+* [David W. Hogg](http://cosmo.nyu.edu/hogg/), New York University
 
 ### License: ###
 
