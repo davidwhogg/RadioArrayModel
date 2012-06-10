@@ -62,21 +62,46 @@ def get_amplitudes_at_times(times, nus, amps):
     return np.sum(amps[None, :] * phases, axis=1)
 
 def get_intensities_at_times(times, nus, amps):
-    return get_amplitudes_at_times(times, nus, amps) ** 2
+    amps = get_amplitudes_at_times(times, nus, amps)
+    return np.real(amps) ** 2 + np.imag(amps) ** 2
 
-def main():
+def main(prefix):
     nu0 = 1.e9
-    nus = sample_frequency(nu0, 0.05 * nu0, 100)
+    dnu = 1.e8
+    nus = sample_frequency(nu0, dnu, 100)
     print "nus", nus.shape
-    amps = sample_amplitudes(nus, 2.7)
+    amps = sample_amplitudes(nus, 2.7e10)
     print "amps", amps.shape
-    times = np.arange(10000) / nu0 / 10.
+    dt = 0.1 / nu0
+    times = 0.5 * dt + dt * np.arange(10000)
+    t0 = 0.
+    t1 = 3. / dnu
+    t2 = dt * times.size
     print "times", times.shape
     fields = get_amplitudes_at_times(times, nus, amps)
     print "fields", fields.shape
+    plt.clf()
+    for s in (1,2):
+        plt.subplot(1,2,s)
+        plt.plot(times, np.real(fields), "k-")
+        plt.plot(times, np.imag(fields), "k-")
+        if s == 1:
+            plt.xlim(t0, t1)
+        else:
+            plt.xlim(t0, t2)
+    plt.savefig(prefix + "fields.png")
     Inus = get_intensities_at_times(times, nus, amps)
     print "intensities", fields.shape
+    plt.clf()
+    for s in (1,2):
+        plt.subplot(1,2,s)
+        plt.plot(times, Inus, "k-")
+        if s == 1:
+            plt.xlim(t0, t1)
+        else:
+            plt.xlim(t0, t2)
+    plt.savefig(prefix + "Inus.png")
     return None
 
 if __name__ == "__main__":
-    main()
+    main("sandbox")
