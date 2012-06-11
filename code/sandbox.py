@@ -34,14 +34,16 @@ def black_body(nus, T):
     return (2. * hh * nus ** 3 / cc ** 2 /
             (np.exp(hh * nus / (kk * T)) - 1.))
 
-def make_signal(nu0, deltaNu, T, K):
+def make_signal(nu0, deltaNu, T, Omega, K):
     """
     Obtain a set of `K` frequencies and corresponding complex
     amplitudes, given a temperature `T`.  The frequencies are chosen
     from a uniform distribution of of width `deltaNu` centered at
     frequency `nu0`.  They are drawn from a uniform distribution in
     *frequency*.  The amplitudes are chosen deterministically from the
-    Planck Law at temperature `T`, but the phases are randomized.
+    Planck Law for a patch of (presumed tiny) solid angle Omega
+    emitting at temperature `T`.  The phases are randomized to make
+    the signal properly stochastic.
     """
     dnu = deltaNu / float(K)
     minNu = nu0 - 0.5 * deltaNu
@@ -50,7 +52,7 @@ def make_signal(nu0, deltaNu, T, K):
     nubreaks = np.append(np.append([minNu, ], nubreaks), [maxNu])
     nus = 0.5 * (nubreaks[1:] + nubreaks[:-1])
     dnus = (nubreaks[1:] - nubreaks[:-1])
-    intensities = black_body(nus, T) * dnus
+    intensities = black_body(nus, T) * Omega * dnus
     phaseFactors = np.exp(-1.j * 2. * np.pi * np.random.uniform(size=K))
     return nus, np.sqrt(intensities) * phaseFactors
 
@@ -151,15 +153,17 @@ def plot_all_corrs(times, corrs, prefix):
     return None
 
 def main(prefix):
-    nu0 = 8.e9 # typical VLA frequency?
-    dnu = 1.e7 # typical VLA bandwidth?
+    nu0 = 8.e9 # Hz; typical VLA frequency?
+    dnu = 1.e7 # Hz; typical VLA bandwidth?
     # dnu = 1. # made up to be visibly smooth
-    T = 3.e19 / dnu # totally made up for no reason
-    nus, amps = make_signal(nu0, dnu, T, 31)
+    deltaT = 600. # s; integration interval; typical for VLA?
+    T = 3.e12 # K; source temperature; totally made up for no reason
+    Omega = 1.e-12 # ster; source solid angle; totally made up for no reason
+    K = 32 # number of frequencies to simulate
+    nus, amps = make_signal(nu0, dnu, T, Omega, K)
     print "nus", nus.shape
     print "amps", amps.shape
-    M = 3000 # number of time samples to average per integration interval
-    deltaT = 600. # s; integration interval
+    M = 4096 # number of time samples to average per integration interval
     t0 = 0.
     t2 = t0 + deltaT
     dt = (t2 - t0) / float(M)
