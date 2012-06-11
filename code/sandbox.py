@@ -40,16 +40,18 @@ def make_signal(nu0, deltaNu, T, K):
     amplitudes, given a temperature `T`.  The frequencies are chosen
     from a uniform distribution of of width `deltaNu` centered at
     frequency `nu0`.  They are drawn from a uniform distribution in
-    *frequency*.  The amplitudes are chosen from a distribution such
-    that the mean squared amplitude is the intensity as given by the
-    Planck Law at temperature `T`.
+    *frequency*.  The amplitudes are chosen deterministically from the
+    Planck Law at temperature `T`, but the phases are randomized.
     """
     dnu = deltaNu / float(K)
-    nus = nu0 - 0.5 * deltaNu + dnu * (np.arange(K) + 0.5)
-    # nus = nu0 - 0.5 * deltaNu + deltaNu * np.random.uniform(size=K)
-    intensities = black_body(nus, T) * dnu
+    minNu = nu0 - 0.5 * deltaNu
+    maxNu = nu0 + 0.5 * deltaNu
+    nubreaks = np.sort(minNu + deltaNu * np.random.uniform(size=(K - 1)))
+    nubreaks = np.append(np.append([minNu, ], nubreaks), [maxNu])
+    nus = 0.5 * (nubreaks[1:] + nubreaks[:-1])
+    dnus = (nubreaks[1:] - nubreaks[:-1])
+    intensities = black_body(nus, T) * dnus
     phaseFactors = np.exp(-1.j * 2. * np.pi * np.random.uniform(size=K))
-    # unitAmplitudes = 0.5 * (np.random.normal(size=K) + 1.j * np.random.normal(size=K))
     return nus, np.sqrt(intensities) * phaseFactors
 
 def get_amplitudes_at_times(times, nus, amps):
@@ -167,7 +169,7 @@ def main(prefix):
     delays = np.array([(100. / nu0) * np.random.uniform() for n in range(N)])
     corrs = get_array_correlations(times, delays, nus, amps)
     print "correlations", corrs.shape
-    plot_all_corrs(times, corrs, "sandbox")
+    plot_all_corrs(times, corrs, prefix)
     return None
 
 if __name__ == "__main__":
