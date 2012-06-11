@@ -45,11 +45,12 @@ def make_signal(nu0, deltaNu, T, K):
     Planck Law at temperature `T`.
     """
     dnu = deltaNu / float(K)
-    # nus = nu0 - 0.5 * deltaNu + dnu * (np.arange(K) + 0.5)
-    nus = nu0 - 0.5 * deltaNu + deltaNu * np.random.uniform(size=K)
+    nus = nu0 - 0.5 * deltaNu + dnu * (np.arange(K) + 0.5)
+    # nus = nu0 - 0.5 * deltaNu + deltaNu * np.random.uniform(size=K)
     intensities = black_body(nus, T) * dnu
-    unitAmplitudes = 0.5 * (np.random.normal(size=K) + 1.j * np.random.normal(size=K))
-    return nus, np.sqrt(intensities) * unitAmplitudes
+    phaseFactors = np.exp(-1.j * 2. * np.pi * np.random.uniform(size=K))
+    # unitAmplitudes = 0.5 * (np.random.normal(size=K) + 1.j * np.random.normal(size=K))
+    return nus, np.sqrt(intensities) * phaseFactors
 
 def get_amplitudes_at_times(times, nus, amps):
     """
@@ -77,6 +78,76 @@ def get_correlations_at_times(times, nus, amps1, amps2):
     """
     return get_amplitudes_at_times(times, nus, amps1) * np.conj(get_amplitudes_at_times(times, nus, amps2))
 
+def get_array_correlations(times, delays, nus, amps):
+    """
+    Compute and return all cross-correlations and auto-correlations
+    for an array of telescopes.
+    """
+    ampss = [delay_amplitudes(delay, nus, amps) for delay in delays]
+    corrs = np.zeros((delays.size, delays.size, times.size)).astype("complex")
+    for i in range(delays.size):
+        for j in range(delays.size):
+            corrs[i, j, :] = get_correlations_at_times(times, nus, ampss[i], ampss[j])
+    return corrs
+
+def plot_corrs(times, corrs):
+    """
+    Plot a correlation between two antennae.
+    """
+    assert times.shape == corrs.shape
+    rcorrs = np.real(corrs)
+    mrcorrs = np.mean(rcorrs)
+    icorrs = np.imag(corrs)
+    micorrs = np.mean(icorrs)
+    acorrs = np.abs(corrs)
+    macorrs = np.sqrt(mrcorrs ** 2 + micorrs ** 2)
+    pcorrs = np.arctan2(icorrs, rcorrs)
+    mpcorrs = np.arctan2(micorrs, mrcorrs)
+    y0 = 4. * macorrs # out to 2-sigma
+    xlim = (np.min(times), np.max(times))
+    for s, ys, meany, ylim, label, in [
+        (1, rcorrs, mrcorrs, (-y0, y0), "real part"),
+        (2, icorrs, micorrs, (-y0, y0), "imaginary part"),
+        (4, acorrs, macorrs, (0., y0), "amplitude"),
+        (5, pcorrs, mpcorrs, (-np.pi, np.pi), "phase (argument)"),
+        ]:
+        plt.subplot(2, 3, s)
+        plt.plot(times, ys, "k.", alpha=0.5)
+        plt.axhline(meany, color="r")
+        plt.xlabel("time")
+        plt.title(label)
+        plt.xlim(xlim)
+        plt.ylim(ylim)
+    plt.subplot(2, 3, 3)
+    plt.plot(rcorrs, icorrs, "k.", alpha=0.5)
+    plt.plot(macorrs * np.cos(2. * np.pi * np.arange(1001) / 1000.),
+             macorrs * np.sin(2. * np.pi * np.arange(1001) / 1000.), "r-")
+    plt.plot([0., 10. * macorrs * np.cos(mpcorrs)],
+             [0., 10. * macorrs * np.sin(mpcorrs)], "r-")
+    plt.title("complex plane")
+    plt.xlim(-y0, y0)
+    plt.ylim(-y0, y0)
+    return None
+
+def plot_all_corrs(times, corrs, prefix):
+    """
+    Make full set of plots of all cross- and auto-correlations.
+    """
+    N, N2, M = corrs.shape
+    assert N == N2
+    assert M == times.size
+    for i in range(N):
+        for j in range(N):
+            plt.figure(figsize = (9., 6.)) # inches?
+            plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9,
+                                wspace=0.3, hspace=0.3)
+            plt.clf()
+            plot_corrs(times, corrs[i, j])
+            fn = "%s_%02d_%02d.png" % (prefix, i, j)
+            print "writing %s" % fn
+            plt.savefig(fn)
+    return None
+
 def main(prefix):
     nu0 = 8.e9 # typical VLA frequency?
     dnu = 1.e7 # typical VLA bandwidth?
@@ -85,54 +156,18 @@ def main(prefix):
     nus, amps = make_signal(nu0, dnu, T, 31)
     print "nus", nus.shape
     print "amps", amps.shape
-    M = 3000
+    M = 3000 # number of time samples to average per integration interval
+    deltaT = 600. # s; integration interval
     t0 = 0.
-    t1 = 3. / dnu
-    t2 = 600. # 10 min in s
+    t2 = t0 + deltaT
     dt = (t2 - t0) / float(M)
     times = np.sort(t0 + (t2 - t0) * np.random.uniform(size=M))
     print "times", times.shape, times.min(), times.max()
-    delay = (100. / nu0) * np.random.uniform()
-    amps2 = delay_amplitudes(delay, nus, amps)
-    print "amps2", amps2.shape
-    Inus = get_correlations_at_times(times, nus, amps, amps2)
-    print "intensities", Inus.shape
-    rInus = np.real(Inus)
-    mrInus = np.mean(rInus)
-    iInus = np.imag(Inus)
-    miInus = np.mean(iInus)
-    aInus = np.abs(Inus)
-    maInus = np.sqrt(mrInus ** 2 + miInus ** 2)
-    y0 = 4. * maInus # out to 2-sigma
-    pInus = np.arctan2(iInus, rInus)
-    mpInus = np.arctan2(miInus, mrInus)
-    plt.figure(figsize = (9., 6.)) # inches?
-    plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9,
-                        wspace=0.3, hspace=0.3)
-    plt.clf()
-    for s, ys, meany, ylim, label, in [
-        (1, rInus, mrInus, (-y0, y0), "real part"),
-        (2, iInus, miInus, (-y0, y0), "imaginary part"),
-        (4, aInus, maInus, (0., y0), "amplitude"),
-        (5, pInus, mpInus, (-np.pi, np.pi), "phase (argument)"),
-        ]:
-        plt.subplot(2, 3, s)
-        plt.plot(times, ys, "k.", alpha=0.5)
-        plt.axhline(meany, color="r")
-        plt.xlabel("time")
-        plt.title(label)
-        plt.xlim(t0, t2)
-        plt.ylim(ylim)
-    plt.subplot(2, 3, 3)
-    plt.plot(rInus, iInus, "k.", alpha=0.5)
-    plt.plot(maInus * np.cos(2. * np.pi * np.arange(1001) / 1000.),
-             maInus * np.sin(2. * np.pi * np.arange(1001) / 1000.), "r-")
-    plt.plot([0., 10. * maInus * np.cos(mpInus)],
-             [0., 10. * maInus * np.sin(mpInus)], "r-")
-    plt.title("complex plane")
-    plt.xlim(-y0, y0)
-    plt.ylim(-y0, y0)
-    plt.savefig(prefix + "_Inus.png")
+    N = 4 # number of telescopes
+    delays = np.array([(100. / nu0) * np.random.uniform() for n in range(N)])
+    corrs = get_array_correlations(times, delays, nus, amps)
+    print "correlations", corrs.shape
+    plot_all_corrs(times, corrs, "sandbox")
     return None
 
 if __name__ == "__main__":
