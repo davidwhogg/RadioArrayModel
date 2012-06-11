@@ -73,48 +73,47 @@ def get_correlations_at_times(times, nus, amps1, amps2):
     return get_amplitudes_at_times(times, nus, amps1) * np.conj(get_amplitudes_at_times(times, nus, amps2))
 
 def main(prefix):
-    nu0 = 1.e9
-    dnu = 5.e7
+    nu0 = 1.e10 # typical VLA frequency?
+    dnu = 1.e7 # typical VLA bandwidth?
+    # dnu = 1. # made up to be visibly smooth
     nus, amps = make_signal(nu0, dnu, 2.7e10, 100)
     print "nus", nus.shape
     print "amps", amps.shape
-    dt = 0.1 / nu0
-    times = 0.5 * dt + dt * np.arange(10000)
+    M = 10000
     t0 = 0.
     t1 = 3. / dnu
-    t2 = dt * times.size
+    t2 = 600.
+    times = t0 + (t2 - t0) * np.arange(M) / M # 600 s = 10 min
     print "times", times.shape
     fields = get_amplitudes_at_times(times, nus, amps)
     print "fields", fields.shape
-    plt.clf()
-    real_kwargs = {"lw": 1., "alpha": 1.}
-    imag_kwargs = {"lw": 2., "alpha": 0.5}
-    for s in (1,2):
-        plt.subplot(1,2,s)
-        plt.plot(times, np.real(fields), "k-", **real_kwargs)
-        plt.plot(times, np.imag(fields), "k-", **imag_kwargs)
-        if s == 1:
-            plt.xlim(t0, t1)
-        else:
-            plt.xlim(t0, t2)
-    plt.savefig(prefix + "fields.png")
-    delay = 10. * nu0 * np.random.uniform()
+    delay = (100. / nu0) * np.random.uniform()
     amps2 = delay_amplitudes(delay, nus, amps)
     print "amps2", amps2.shape
     Inus = get_correlations_at_times(times, nus, amps, amps2)
+    rInus = np.real(Inus)
+    mrInus = np.mean(rInus)
+    iInus = np.imag(Inus)
+    miInus = np.mean(iInus)
+    aInus = np.abs(Inus)
+    maInus = np.sqrt(mrInus ** 2 + miInus ** 2)
+    pInus = np.arctan2(iInus, rInus)
+    mpInus = np.arctan2(miInus, mrInus)
     print "intensities", fields.shape
     plt.clf()
-    for s in (1,2):
-        plt.subplot(1,2,s)
-        plt.plot(times, np.real(Inus), "k-", zorder=0, **real_kwargs)
-        plt.plot(times, np.imag(Inus), "k-", zorder=0, **imag_kwargs)
-        plt.plot(times, np.zeros_like(times) + np.mean(np.real(Inus)), "r-", zorder=1, **real_kwargs)
-        plt.plot(times, np.zeros_like(times) + np.mean(np.imag(Inus)), "r-", zorder=1, **imag_kwargs)
-        if s == 1:
-            plt.xlim(t0, t1)
-        else:
-            plt.xlim(t0, t2)
-    plt.savefig(prefix + "Inus.png")
+    for s, ys, meany, label in [
+        (1, rInus, mrInus, "real part of correlation"),
+        (2, iInus, miInus, "imaginary part of correlation"),
+        (3, aInus, maInus, "amplitude of correlation"),
+        (4, pInus, mpInus, "phase (argument) of correlation"),
+        ]:
+        plt.subplot(2, 2, s)
+        plt.plot(times, ys, "k.", alpha=0.5)
+        plt.axhline(meany, color="r")
+        plt.xlabel("time")
+        plt.ylabel(label)
+        plt.xlim(t0, t2)
+    plt.savefig(prefix + "_Inus.png")
     return None
 
 if __name__ == "__main__":
