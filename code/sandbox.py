@@ -34,6 +34,15 @@ def black_body(nus, T):
     return (2. * hh * nus ** 3 / cc ** 2 /
             (np.exp(hh * nus / (kk * T)) - 1.))
 
+def get_thermal_amplitudes(nus, dnus, T, Omega):
+    """
+    Make a thermal signal in complex-amplitude space on a set of
+    (irregularly spaced) frequencies.
+    """
+    intensities = black_body(nus, T) * Omega * dnus
+    phaseFactors = np.exp(-1.j * 2. * np.pi * np.random.uniform(size=nus.size))
+    return np.sqrt(intensities) * phaseFactors
+
 def make_signal(nu0, deltaNu, T, Omega, K):
     """
     Obtain a set of `K` frequencies and corresponding complex
@@ -52,9 +61,7 @@ def make_signal(nu0, deltaNu, T, Omega, K):
     nubreaks = np.append(np.append([minNu, ], nubreaks), [maxNu])
     nus = 0.5 * (nubreaks[1:] + nubreaks[:-1])
     dnus = (nubreaks[1:] - nubreaks[:-1])
-    intensities = black_body(nus, T) * Omega * dnus
-    phaseFactors = np.exp(-1.j * 2. * np.pi * np.random.uniform(size=K))
-    return nus, np.sqrt(intensities) * phaseFactors
+    return nus, dnus, get_thermal_amplitudes(nus, dnus, T, Omega)
 
 def get_amplitudes_at_times(times, nus, amps):
     """
@@ -82,12 +89,23 @@ def get_correlations_at_times(times, nus, amps1, amps2):
     """
     return get_amplitudes_at_times(times, nus, amps1) * np.conj(get_amplitudes_at_times(times, nus, amps2))
 
-def get_array_correlations(times, delays, nus, amps):
+def get_array_correlations(times, delays, temperatures, nus, dnus, amps):
     """
     Compute and return all cross-correlations and auto-correlations
-    for an array of telescopes.
+    for an array of antennae.
+
+    ### inputs:
+    - `times`: times at which to delta-function sample the signals
+    - `delays`: time-delays of antennae relative to fiducial
+    - `temperatures`: antenna temperatures
+    - `nus`: frequencies at which source amplitudes are defined
+    - `amps`: amplitudes of signal from the source
     """
-    ampss = [delay_amplitudes(delay, nus, amps) for delay in delays]
+    assert delays.shape == temperatures.shape
+    assert nus.shape == amps.shape
+    ampss = [delay_amplitudes(delay, nus, amps) +
+             get_thermal_amplitudes(nus, dnus, T, 4. * np.pi)
+             for delay, T in zip(delays, temperatures)]
     corrs = np.zeros((delays.size, delays.size, times.size)).astype("complex")
     for i in range(delays.size):
         for j in range(delays.size):
@@ -154,13 +172,13 @@ def plot_all_corrs(times, corrs, prefix):
 
 def main(prefix):
     nu0 = 8.e9 # Hz; typical VLA frequency?
-    dnu = 1.e7 # Hz; typical VLA bandwidth?
-    # dnu = 1. # made up to be visibly smooth
+    deltaNu = 1.e7 # Hz; typical VLA bandwidth?
+    # deltaNu = 1. # made up to be visibly smooth
     deltaT = 600. # s; integration interval; typical for VLA?
-    T = 3.e12 # K; source temperature; totally made up for no reason
+    T = 3.e15 # K; source temperature; totally made up for no reason
     Omega = 1.e-12 # ster; source solid angle; totally made up for no reason
     K = 32 # number of frequencies to simulate
-    nus, amps = make_signal(nu0, dnu, T, Omega, K)
+    nus, dnus, amps = make_signal(nu0, deltaNu, T, Omega, K)
     print "nus", nus.shape
     print "amps", amps.shape
     M = 4096 # number of time samples to average per integration interval
@@ -171,7 +189,8 @@ def main(prefix):
     print "times", times.shape, times.min(), times.max()
     N = 4 # number of telescopes
     delays = np.array([(100. / nu0) * np.random.uniform() for n in range(N)])
-    corrs = get_array_correlations(times, delays, nus, amps)
+    temperatures = np.array([10. for n in range(N)]) # K; antenna temperatures; totally made up
+    corrs = get_array_correlations(times, delays, temperatures, nus, dnus, amps)
     print "correlations", corrs.shape
     plot_all_corrs(times, corrs, prefix)
     return None
