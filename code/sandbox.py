@@ -9,6 +9,7 @@ interferometers.
 ### issues:
 * should work in log frequency and nu I_nu, rather than frequency and
   I_nu
+* Not sure the black_body units make sense.  Auditing necessary.
 """
 
 if __name__ == "__main__":
@@ -33,18 +34,20 @@ def black_body(nus, T):
     return (2. * hh * nus ** 3 / cc ** 2 /
             (np.exp(hh * nus / (kk * T)) - 1.))
 
-def make_signal(nu, deltaNu, T, K):
+def make_signal(nu0, deltaNu, T, K):
     """
     Obtain a set of `K` frequencies and corresponding complex
     amplitudes, given a temperature `T`.  The frequencies are chosen
     from a uniform distribution of of width `deltaNu` centered at
-    frequency `nu`.  They are drawn from a uniform distribution in
+    frequency `nu0`.  They are drawn from a uniform distribution in
     *frequency*.  The amplitudes are chosen from a distribution such
     that the mean squared amplitude is the intensity as given by the
     Planck Law at temperature `T`.
     """
-    nus = nu - 0.5 * deltaNu + deltaNu * np.random.uniform(size=K)
-    intensities = black_body(nus, T) * deltaNu / K
+    dnu = deltaNu / float(K)
+    nus = nu0 - 0.5 * deltaNu + dnu * (np.arange(K) + 0.5)
+    # nus = nu0 - 0.5 * deltaNu + deltaNu * np.random.uniform(size=K)
+    intensities = black_body(nus, T) * dnu
     unitAmplitudes = 0.5 * (np.random.normal(size=K) + 1.j * np.random.normal(size=K))
     return nus, np.sqrt(intensities) * unitAmplitudes
 
@@ -73,23 +76,26 @@ def get_correlations_at_times(times, nus, amps1, amps2):
     return get_amplitudes_at_times(times, nus, amps1) * np.conj(get_amplitudes_at_times(times, nus, amps2))
 
 def main(prefix):
-    nu0 = 1.e10 # typical VLA frequency?
+    nu0 = 8.e9 # typical VLA frequency?
     dnu = 1.e7 # typical VLA bandwidth?
     # dnu = 1. # made up to be visibly smooth
-    nus, amps = make_signal(nu0, dnu, 2.7e10, 100)
+    T = 3.e19 / dnu # totally made up for no reason
+    nus, amps = make_signal(nu0, dnu, T, 31)
     print "nus", nus.shape
     print "amps", amps.shape
-    M = 10000
+    M = 3000
     t0 = 0.
     t1 = 3. / dnu
-    t2 = 600.
-    times = t0 + (t2 - t0) * np.arange(M) / M # 600 s = 10 min
-    print "times", times.shape
+    t2 = 600. # 10 min in s
+    dt = (t2 - t0) / float(M)
+    times = np.sort(t0 + (t2 - t0) * np.random.uniform(size=M))
+    print "times", times.shape, times.min(), times.max()
     fields = get_amplitudes_at_times(times, nus, amps)
     print "fields", fields.shape
     delay = (100. / nu0) * np.random.uniform()
     amps2 = delay_amplitudes(delay, nus, amps)
     print "amps2", amps2.shape
+    print amps2
     Inus = get_correlations_at_times(times, nus, amps, amps2)
     rInus = np.real(Inus)
     mrInus = np.mean(rInus)
@@ -97,15 +103,16 @@ def main(prefix):
     miInus = np.mean(iInus)
     aInus = np.abs(Inus)
     maInus = np.sqrt(mrInus ** 2 + miInus ** 2)
+    y0 = 2. * maInus
     pInus = np.arctan2(iInus, rInus)
     mpInus = np.arctan2(miInus, mrInus)
     print "intensities", fields.shape
     plt.clf()
-    for s, ys, meany, label in [
-        (1, rInus, mrInus, "real part of correlation"),
-        (2, iInus, miInus, "imaginary part of correlation"),
-        (3, aInus, maInus, "amplitude of correlation"),
-        (4, pInus, mpInus, "phase (argument) of correlation"),
+    for s, ys, meany, ylim, label, in [
+        (1, rInus, mrInus, (-y0, y0), "real part of correlation"),
+        (2, iInus, miInus, (-y0, y0), "imaginary part of correlation"),
+        (3, aInus, maInus, (0., y0), "amplitude of correlation"),
+        (4, pInus, mpInus, (-np.pi, np.pi), "phase (argument) of correlation"),
         ]:
         plt.subplot(2, 2, s)
         plt.plot(times, ys, "k.", alpha=0.5)
@@ -113,6 +120,7 @@ def main(prefix):
         plt.xlabel("time")
         plt.ylabel(label)
         plt.xlim(t0, t2)
+        plt.ylim(ylim)
     plt.savefig(prefix + "_Inus.png")
     return None
 
