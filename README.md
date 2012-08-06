@@ -31,7 +31,8 @@ touch with Hogg.
 * There are N radio telescopes and ~N^2 baselines; does this mean that
   noise in the baselines must be correlated?  Or does the long
   integration time (relative to the coherence time) erase these
-  correlations?
+  correlations?  How can we see these correlations empirically; that
+  is, can we test this idea directly with the raw data?
 
 * There are N radio telescopes and ~N^2 baselines; does this mean that
   you can infer the phase delays you get from your phase calibrator
