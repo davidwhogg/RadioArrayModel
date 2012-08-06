@@ -46,7 +46,7 @@ touch with Hogg.
 * Can we go "fully probilistic"?  Is it possible to return a posterior
   PDF over scenes that could have created the data?
 
-### Related projects: ###
+### Related projects and bibliography: ###
 
 * **Peter Williams** (Berkeley) is developing Python code to do
     analysis of interferometry data, with an emphasis on transient
@@ -55,5 +55,9 @@ touch with Hogg.
     (which are like priors, of course) for optical interferometry
     problems.
 * **Sutton** and **Wandelt** (2006)
-    [Optimal Image Reconstruction in Radio Interferometry](http://arxiv.org/abs/astro-ph/0604331)
-    is close to the whole enchilada.
+    [Optimal image reconstruction in radio interferometry](http://arxiv.org/abs/astro-ph/0604331)
+    is close to the whole enchilada; includes likelihood function and sophisticated priors.
+    *This is the project to outperform or out-code.*
+* **Kemball** *et al* (2010)
+    [Further evaluation of bootstrap resampling as a tool for radio-interferometric imaging fidelity assessment](http://arxiv.org/abs/0911.2007)
+    looks at bootstrap methods to put uncertainties on radio maps generated from interferometry.
