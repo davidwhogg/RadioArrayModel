@@ -22,6 +22,29 @@ touch with Hogg.
 * **Brendon Brewer**, UC Santa Barbara
 * **Hans-Walter Rix**, Max-Planck-Institut für Astronomie
 
+### Things to think about: ###
+
+* You have a faint blob in your cleaned image.  Is it significant?
+  Surely this is a question that should or could be answered in the
+  space of visibilities.
+
+* There are N radio telescopes and ~N^2 baselines; does this mean that
+  noise in the baselines must be correlated?  Or does the long
+  integration time (relative to the coherence time) erase these
+  correlations?
+
+* There are N radio telescopes and ~N^2 baselines; does this mean that
+  you can infer the phase delays you get from your phase calibrator
+  from the science data themselves?  That is, can you self-calibrate
+  always when N is large?
+
+* Bandwidth-smearing is something that needs to be a part of any real
+  generative model.  That is, we might be able to account for this in
+  a proper model.
+
+* Can we go "fully probilistic"?  Is it possible to return a posterior
+  PDF over scenes that could have created the data?
+
 ### Related projects: ###
 
 * **Peter Williams** (Berkeley) is developing Python code to do
