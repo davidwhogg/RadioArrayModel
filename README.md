@@ -11,7 +11,7 @@ explain a set of radio interferometry data.
 
 ### License: ###
 
-Copyright 2010 2011 2012 the author.  **All rights reserved.**
+Copyright 2012 the author.  **All rights reserved.**
 
 If you have interest in using or re-using any of this content, get in
 touch with Hogg.
