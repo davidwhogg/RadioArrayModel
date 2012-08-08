@@ -20,7 +20,9 @@ touch with Hogg.
 
 * **Frank Bigiel**, Universität Heidelberg
 * **Brendon Brewer**, UC Santa Barbara
+* **Tom Herbst**, Max-Planck-Institut für Astronomie
 * **Hans-Walter Rix**, Max-Planck-Institut für Astronomie
+* **Fabian Walter**, Max-Planck-Institut für Astronomie
 
 ### Things to think about: ###
 
@@ -28,16 +30,23 @@ touch with Hogg.
   Surely this is a question that should or could be answered in the
   space of visibilities.
 
-* There are N radio telescopes and ~N^2 baselines; does this mean that
-  noise in the baselines must be correlated?  Or does the long
-  integration time (relative to the coherence time) erase these
-  correlations?  How can we see these correlations empirically; that
-  is, can we test this idea directly with the raw data?
+* Can we write down a good noise model for visibilities; that is,
+  can we take things known about the antennae and correlator and
+  predict the magnitudes of the residuals in the visibilities away
+  from the best-fit "true scene" model (convolved with the dirty
+  beam)?
+
+* Related to the above, is it possible to project the scene inferred
+  by CLEAN back into the visibilities and test the noise model?
 
 * There are N radio telescopes and ~N^2 baselines; does this mean that
   you can infer the phase delays you get from your phase calibrator
   from the science data themselves?  That is, can you self-calibrate
   always when N is large?
+
+* Related to the above, shouldn't we be marginalizing over the phase
+  calibration information, since (a) it is noisy and (b) it requires
+  interpolation between calibration measurements?
 
 * Bandwidth-smearing is something that needs to be a part of any real
   generative model.  That is, we might be able to account for this in
@@ -45,6 +54,12 @@ touch with Hogg.
 
 * Can we go "fully probilistic"?  Is it possible to return a posterior
   PDF over scenes that could have created the data?
+
+* Should we be looking for and using interesting and astronomy-informed
+  prior information on the scene we infer?
+
+* Would a generative model help usefully with RFI identifcation and
+  elimination?
 
 ### Related projects and bibliography: ###
 
