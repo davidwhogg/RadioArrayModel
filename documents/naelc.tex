@@ -1,0 +1,68 @@
+% This file is part of the Radio Array Model project.
+% Copyright 2012 David W. Hogg
+
+\documentclass[12pt]{article}
+
+\newcommand{\project}[1]{\textsl{#1}}
+\newcommand{\CLEAN}{\project{CLEAN}}
+\newcommand{\NAELC}{\project{NAELC}}
+
+\newcommand{\set}[1]{\left\{{#1}\right\}}
+\newcommand{\given}{\,|\,}
+\newcommand{\expectation}[1]{\tilde{#1}}
+\newcommand{\dd}{\mathrm{d}}
+
+\begin{document}
+
+...Interferometry data have these properties...positive reasons to do
+what we are doing...
+
+...\CLEAN\ is very wrong...negative reasons to do what we are doing...
+
+We get from the telescope \emph{visibilities}, which for our purposes
+are $N$ samples $d_n$ of the form
+\begin{eqnarray}
+d_n &\equiv& \set{a_n, b_n, t_n, u_n, v_n, w_n, Z_n}
+\\
+Z_n &\equiv& A_n + i\,B_n
+\\
+Z_n &\equiv& \left|Z_n\right|\,\exp(i\,\phi_n)
+\quad,
+\end{eqnarray}
+where $a_n$ and $b_n$ are the identities of the two antennae used to
+make the baseline used for sample $n$, $t_n$ is the time at which the
+sample was taken, $(u_n, v_n)$ is the $u$--$v$-plane location of the
+sample, $w_n$ can be ignored (for our purposes), and $Z_n$ is the
+measured complex amplitude or \emph{visibility}.  In what follows, we
+will assume that every aspect of the data is correctly calibrated.
+Under this assumption, the $Z_n$ are really the data, and the $(u_n,
+v_n)$ can be thought of as prior information.
+
+Each sample comes from a baseline connecting two antennae; each
+antenna has a system temperature, and there is also a correlator
+temperature of some kind, so we expect a noise variance $\sigma_n^2$
+on the complex $Z_n$
+\begin{eqnarray}
+\sigma_n^2 &\propto& T_a + T_b + T_{ab}
+\quad ,
+\end{eqnarray}
+where $T_a$ is the noise temperature of antenna $a_n$, $T_b$ is the
+noise temperature of antenna $b_n$, and $T_{ab}$ is an additional
+correlator noise for this baseline.
+
+The generative model for our purposes is as follows: There is a
+time-independent intensity field $I(x,y\given\nu)$ as a function of
+electromagnetic frequency $\nu$, defined in sky coordinates $(x,y)$ or
+the $x$--$y$ plane.  At each $(u_n, v_n)$ sample location in the
+$u$--$v$ plane the expected complex visibility is
+\begin{eqnarray}
+\expectation{Z_n} &=& \int I(x,y\given\nu)\,\exp(-2\pi\,i\,[u_n\,x + v_n\,y])\,\dd x\,\dd y
+\end{eqnarray}
+(HOGG: work out pre-factors like $\sqrt{\pi}$ etc.).
+
+\begin{eqnarray}
+-2\,\ln p(Z_n|I) &=& \frac{Z_n - \expectation{Z_n}}{\sigma_n^2}
+\end{eqnarray}
+ignoring an offset.
+
+\end{document}
