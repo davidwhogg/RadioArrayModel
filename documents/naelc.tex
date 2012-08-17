@@ -15,6 +15,12 @@
 
 \begin{document}
 
+\textsl{This document has been written by David~W.~Hogg (NYU).  It is
+  based in part on conversations in Valchava on 2012-08-16 among
+  Fergus, Harmeling, Hirsch, Hogg, Muandet, Rix, Sch\"olkopf, Schuler
+  and in part on coversations in Heidelberg on 2012-08-08 among
+  Bigiel, Herbst, Hogg, Rix, Walter.}
+
 ...Interferometry data have these properties...positive reasons to do
 what we are doing...
 
@@ -134,5 +140,17 @@ intensities $a_k$ are variable parameters but the element positions
 $(x_k, y_k)$ are seen as prior information.
 
 hybrid:
+\begin{eqnarray}
+I(x,y\given\nu) &=& \sum_{m=1}^M f_m\,g(x,y\given s_m)
+                  + \sum_{k=1}^K a_k\,h_k(x, y)
+\\
+\theta &\equiv& \set{\set{f_m, s_m}_{m=1}^M, \set{a_k}_{k=1}^K}
+\quad.
+\end{eqnarray}
+
+\paragraph{Intensity priors or regularization}
+
+...Stefan thinks this might not be necessary.  Fergus and Schuler
+think this is absolutely necessary...
 
 \end{document}
