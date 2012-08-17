@@ -39,8 +39,8 @@ sample was taken, $(u_n, v_n)$ is the $u$--$v$-plane location of the
 sample, $w_n$ can be ignored (for our purposes), and $Z_n$ is the
 measured complex amplitude or \emph{visibility}.  In what follows, we
 will assume that every aspect of the data is correctly calibrated.
-Under this assumption, the $Z_n$ are really the data, and the $(u_n,
-v_n)$ can be thought of as prior information.
+Under this assumption, the $Z_n$ are really the data; the $(u_n,
+v_n)$ and $\nu_n$ can be thought of as prior information.
 
 Each sample comes from a baseline connecting two antennae; each
 antenna has a system temperature, and there is also a correlator
@@ -84,7 +84,8 @@ where $\normal(x\given m,V)$ is the Gaussian distribution for $x$
 given mean $m$ and variance $V$, we have ignored constant offsets in
 the logarithms, we have assembled all the $Z_n$ into a large data blob
 $D$, and we have assumed that the noise contributions to the $Z_n$ are
-independent.
+independent.  The likelihood is effectively conditioned on an
+assumption that $(u_n, v_n)$ and $\nu_n$ are reliable.
 
 \paragraph{Intensity models}
 
@@ -108,6 +109,30 @@ intensity, because the bright sources are ``cleaned'' as point sources
 and the faint sources are left behind in the dirty residual expressed
 as a raster image in the intensity domain.)
 
+catalog:
+\begin{eqnarray}
+I(x,y\given\nu) &=& \sum_{m=1}^M f_m\,g(x,y\given s_m)
+\\
+\theta &\equiv& \set{f_m, s_m}_{m=1}^M
+\quad,
+\end{eqnarray}
+where the $f_m$ are object fluxes, and the $s_m$ are object positions,
+shapes, and orientations.  All the fluxes $f_m$ and positions and
+shapes $s_m$ are variable parameters.
 
+raster:
+\begin{eqnarray}
+I(x,y\given\nu) &=& \sum_{k=1}^K a_k\,h_k(x, y)
+\\
+h_k(x, y) &\equiv& h([x-x_k], [y-y_k])
+\\
+\theta &\equiv& \set{a_k}_{k=1}^K
+\quad,
+\end{eqnarray}
+where the $a_k$ are raster-element (``pixel'') intensities.  All the
+intensities $a_k$ are variable parameters but the element positions
+$(x_k, y_k)$ are seen as prior information.
+
+hybrid:
 
 \end{document}
