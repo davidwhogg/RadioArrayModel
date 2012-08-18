@@ -7,11 +7,14 @@
 \newcommand{\CLEAN}{\project{CLEAN}}
 \newcommand{\NAELC}{\project{NAELC}}
 
+\renewcommand{\exp}[1]{e^{#1}}
 \newcommand{\set}[1]{\left\{{#1}\right\}}
 \newcommand{\given}{\,|\,}
 \newcommand{\expectation}[1]{\tilde{#1}}
 \newcommand{\dd}{\mathrm{d}}
 \newcommand{\normal}{N}
+\newcommand{\Normal}{\normal}
+\newcommand{\transpose}[1]{{#1}^{\!\mathsf{T}}}
 
 \begin{document}
 
@@ -39,7 +42,7 @@ d_n &\equiv& \set{a_n, b_n, \nu_n, t_n, u_n, v_n, w_n, Z_n}
 \\
 Z_n &\equiv& A_n + i\,B_n
 \\
-Z_n &\equiv& \left|Z_n\right|\,\exp(i\,\phi_n)
+Z_n &\equiv& \left|Z_n\right|\,\exp{i\,\phi_n}
 \quad,
 \end{eqnarray}
 where $a_n$ and $b_n$ are the identities of the two antennae used to
@@ -53,9 +56,10 @@ Under this assumption, the $Z_n$ are really the data; the $(u_n,
 v_n)$ and $\nu_n$ can be thought of as prior information.
 
 Each sample comes from a baseline connecting two antennae; each
-antenna has a system temperature, and there is also a correlator
-temperature of some kind, so we expect a noise variance $\sigma_n^2$
-on the complex $Z_n$
+antenna has a beam pattern on the sky---what would be the point-spread
+function for a single-dish observation---and a system temperature.
+There is also a correlator temperature of some kind, so we expect a
+noise variance $\sigma_n^2$ on the complex $Z_n$
 \begin{eqnarray}
 \sigma_n^2 &\propto& T_a + T_b + T_{ab}
 \quad ,
@@ -70,12 +74,15 @@ electromagnetic frequency $\nu$, defined in sky coordinates $(x,y)$ or
 the $x$--$y$ plane.  At each $(u_n, v_n)$ sample location in the
 $u$--$v$ plane the expected complex visibility is
 \begin{eqnarray}
-\expectation{Z}_n &=& \int I(x,y\given\nu_n)\,\exp(-2\pi\,i\,[u_n\,x + v_n\,y])\,\dd x\,\dd y
+\expectation{Z}_n &=& \int \psi_a(x,y\given\nu_n)\,\psi_b(x,y\given\nu_n)\,I(x,y\given\nu_n)
+                         \,\exp{-2\pi\,i\,[u_n\,x + v_n\,y]}\,\dd x\,\dd y
 \quad ,
 \end{eqnarray}
-(HOGG: work out pre-factors like $\sqrt{\pi}$ etc.) where we have
-assumed that the electromagnetic frequency bandpass $\Delta\nu_n$ is
-small.
+(HOGG: work out pre-factors like $\sqrt{\pi}$ etc.) where
+$\psi_a(x,y\given\nu_n)$ is the single-antenna beam pattern for
+antenna $a$ at frequency $\nu_n$, $\psi_b$ is the same for antenna
+$b$, and we have assumed that the electromagnetic frequency bandpass
+$\Delta\nu_n$ is small.
 
 If the intensity field $I(x,y\given\nu)$ is governed by (a vector,
 list, or blob of) parameters $\theta$, then under the Gaussian-noise
@@ -95,7 +102,8 @@ given mean $m$ and variance $V$, we have ignored constant offsets in
 the logarithms, we have assembled all the $Z_n$ into a large data blob
 $D$, and we have assumed that the noise contributions to the $Z_n$ are
 independent.  The likelihood is effectively conditioned on an
-assumption that $(u_n, v_n)$ and $\nu_n$ are reliable.
+assumption that $(u_n, v_n)$ and $\nu_n$---and our knowledge about
+beam patterns and noise and so on---are reliable.
 
 \paragraph{Intensity models}
 
@@ -119,18 +127,53 @@ intensity, because the bright sources are ``cleaned'' as point sources
 and the faint sources are left behind in the dirty residual expressed
 as a raster image in the intensity domain.)
 
-catalog:
+The catalog model makes the intensity a mixture of $M$ objects
 \begin{eqnarray}
 I(x,y\given\nu) &=& \sum_{m=1}^M f_m\,g(x,y\given s_m)
 \\
 \theta &\equiv& \set{f_m, s_m}_{m=1}^M
 \quad,
 \end{eqnarray}
-where the $f_m$ are object fluxes, and the $s_m$ are object positions,
-shapes, and orientations.  All the fluxes $f_m$ and positions and
-shapes $s_m$ are variable parameters.
+where the $f_m$ are object fluxes, the function $g(x,y\given s)$ is a
+function that can generate a family of sources with different
+positions (and shapes), and the $s_m$ are parameter blobs containing
+object positions, shapes, and orientations.  All the fluxes $f_m$ and
+positions and shapes $s_m$ are variable parameters.  The catalog model
+is not a general model---it is limited by the number of objects and
+their morphological flexibility---but it is often fast to optimize and
+well-matched to the scientific goals of an imaging project.
+Optimization will not be convex, in general, because the positional
+and shape parameters will usually affect the intensity in a non-linear
+way.
 
-raster:
+The simplest catalog model is a \emph{mixture of delta-functions}, or
+\begin{eqnarray}
+g(x,y\given s_m) &=& \delta([x-x_m], [y-y_m])
+\\
+s_m &\equiv& \set{x_m, y_m}
+\quad,
+\end{eqnarray}
+where $\delta()$ is the two-dimensional delta function and $s_m$
+contains only positional information.  Another simple model (really a
+generalization) is the \emph{mixture of Gaussians}, or
+\begin{eqnarray}
+g(x,y\given s_m) &=& \normal(\xi\given\mu_m,V_m)
+\\
+\xi &\equiv& \transpose{[x, y]}
+\\
+\mu_m &\equiv& \transpose{[x_m, y_m]}
+\\
+s_m &\equiv& \set{x_m, y_m, V_m}
+\quad,
+\end{eqnarray}
+where $\normal()$ is here the two-dimensional gaussian, $\xi$ and
+$\mu$ are two-dimensional position vectors, $V_m$ is a $2\times 2$
+symmetric positive-definite variance tensor, and $s_m$ thereby
+contains both positional and shape information.
+
+The raster model also makes the intensity a mixture of basis
+functions, but now we think of having many functions, all identical
+except for positional shifts, and on a fixed grid;
 \begin{eqnarray}
 I(x,y\given\nu) &=& \sum_{k=1}^K a_k\,h_k(x, y)
 \\
@@ -141,9 +184,20 @@ h_k(x, y) &\equiv& h([x-x_k], [y-y_k])
 \end{eqnarray}
 where the $a_k$ are raster-element (``pixel'') intensities.  All the
 intensities $a_k$ are variable parameters but the element positions
-$(x_k, y_k)$ are seen as prior information.
+$(x_k, y_k)$ are seen as prior information.  The raster model is
+``non-parametric'' in that it can represent very strange intensity
+fields, but at the cost of large numbers of parameters.  One can hope
+to keep things convex.
 
-hybrid:
+Again, the simplest pixel functions are delta-functions
+\begin{eqnarray}
+h_k(x,y) &=& \delta([x-x_k], [y-y_k])
+\quad,
+\end{eqnarray}
+but there are many other options, including square top-hat functions
+and circular Gaussians (HOGG put in formulae).
+
+The hybrid method is more general, being a mixture of the two:
 \begin{eqnarray}
 I(x,y\given\nu) &=& \sum_{m=1}^M f_m\,g(x,y\given s_m)
                   + \sum_{k=1}^K a_k\,h_k(x, y)
@@ -151,10 +205,17 @@ I(x,y\given\nu) &=& \sum_{m=1}^M f_m\,g(x,y\given s_m)
 \theta &\equiv& \set{\set{f_m, s_m}_{m=1}^M, \set{a_k}_{k=1}^K}
 \quad.
 \end{eqnarray}
+Optimization will be difficult because it has all the parameters of
+both models, and all the non-convexity of the catalog method.  Because
+traditional \CLEAN\ works by modeling parts of the intensity field as
+point sources, and parts as a dirty residual map, it produces, in some
+sense, a hybrid model of the intensity field.  It is not, however, an
+optimal map in any sense, and it does not have consistent beam-shape
+(PSF) properties, as noted above.
 
 \paragraph{Intensity priors or regularization}
 
-...Stefan thinks this might not be necessary.  Fergus and Schuler
+...Harmeling thinks this might not be necessary.  Fergus and Schuler
 think this is absolutely necessary...
 
 \end{document}
