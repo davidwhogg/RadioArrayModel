@@ -167,7 +167,7 @@ s_m &\equiv& \set{x_m, y_m, V_m}
 \quad,
 \end{eqnarray}
 where $\normal()$ is here the two-dimensional gaussian, $\xi$ and
-$\mu$ are two-dimensional position vectors, $V_m$ is a $2\times 2$
+$\mu_m$ are two-dimensional position vectors, $V_m$ is a $2\times 2$
 symmetric positive-definite variance tensor, and $s_m$ thereby
 contains both positional and shape information.
 
@@ -215,7 +215,31 @@ optimal map in any sense, and it does not have consistent beam-shape
 
 \paragraph{Intensity priors or regularization}
 
+For any model of the intensity field---catalog, raster, or
+hybrid---there is a large parameter vector $\theta$.  In general we
+have \emph{priors} on this parameter vector that indicate the behavior
+we would like for our inference in the absence of data or when the
+data are not informative.  Because we are producing point estimates,
+these things we call ``priors'' really involve not just our prior
+expectations about the plausibility of any scene but also our
+\emph{utility} or preferences.
+
 ...Harmeling thinks this might not be necessary.  Fergus and Schuler
 think this is absolutely necessary...
+
+...non-negativity...
+
+...spike and slab...
+
+...smoothness or gradients...
+
+\paragraph{Initialization and optimization}
+
+...Schuler will save us all?...
+
+...Do we have tricks that make our inferences fast?  Certainly we know
+that, for the raster components, the major operations are linear
+operations and contain some identical linear-algebra objects at every
+step...
 
 \end{document}
