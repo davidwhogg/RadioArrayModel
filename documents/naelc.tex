@@ -22,11 +22,11 @@
 
 \begin{document}
 
-\textsl{This document has been written by David~W.~Hogg (NYU).  It is
-  based in part on conversations in Valchava on 2012-08-16 among
-  Fergus, Harmeling, Hirsch, Hogg, Muandet, Rix, Sch\"olkopf, Schuler
-  and in part on coversations in Heidelberg on 2012-08-08 among
-  Bigiel, Herbst, Hogg, Rix, Walter.}
+\textsl{This document is a work in progress being written by
+  David~W.~Hogg (NYU).  It is based in part on conversations in
+  Valchava on 2012-08-16 among Fergus, Harmeling, Hirsch, Hogg,
+  Muandet, Rix, Sch\"olkopf, Schuler and in part on coversations in
+  Heidelberg on 2012-08-08 among Bigiel, Herbst, Hogg, Rix, Walter.}
 
 \paragraph{Introduction}
 
@@ -42,9 +42,9 @@ and modifications thereto—--for building radio interferometry maps...
 
 \paragraph{What's wrong with \CLEAN?}
 
-There are many reasons traditional \CLEAN\ needs replacement or
-improvement.  Some of these issues have been addressed in small
-modifications to the traditional method, leading to a zoo of
+There are many reasons that the traditional \CLEAN\ procedure needs
+replacement or improvement.  Some of these issues have been addressed
+in small modifications to the traditional method, leading to a zoo of
 baby-\CLEAN s.  The comments below apply only to the most vanilla or
 traditional implementations of \CLEAN, though we know of no widely
 used system that addresses all of these.
@@ -62,7 +62,7 @@ estimated by measuring variance-like statistics in empty regions.  It
 has no error or noise model and doesn't propagate uncertainties from
 the fundamental visibilities (let alone calibration uncertainties and
 so on).  This blindness to likelihood or noise leads to the problem
-that \hoggitem~\CLEAN can provide no mechanism for producing or
+that \hoggitem~\CLEAN\ can provide no mechanism for producing or
 quantitatively comparing alternative maps.  It produces only a single
 point estimate and no judgement of that estimate or sampling around
 that estimate.  It is a procedure rather than a probabilistic
@@ -83,7 +83,7 @@ the map is ill-defined.  The units of the map are ``Jy per clean
 beam'' for the bright parts and ``Jy per dirty beam'' for the faint
 parts.
 
-On a more technical level (but equally concerning), \hoggitem~\CLEAN
+On a more technical level (but equally concerning), \hoggitem~\CLEAN\ 
 requires binning of the visibility data in the $u$--$v$ plane
 (presumably for fastness).  Rix teaches us that ``binning is
 sinning''.
