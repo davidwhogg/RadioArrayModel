@@ -160,6 +160,10 @@ independent.  The likelihood is effectively conditioned on an
 assumption that $(u_n, v_n)$ and $\nu_n$---and our knowledge about
 beam patterns and noise and so on---are reliable.
 
+\paragraph{Single-dish data}
+
+...tbd...
+
 \paragraph{Intensity models}
 
 There are two general approaches to modeling the intensity field.  In
@@ -251,6 +255,9 @@ h_k(x,y) &=& \delta([x-x_k], [y-y_k])
 \end{eqnarray}
 but there are many other options, including square top-hat functions
 and circular Gaussians (HOGG put in formulae).
+
+...perhaps note here that in the raster model there is some hope for
+linear least squares; be explicit about the linear algebra...
 
 The hybrid method is more general, being a mixture of the two:
 \begin{eqnarray}
