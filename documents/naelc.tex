@@ -3,6 +3,10 @@
 
 \documentclass[12pt]{article}
 
+\newcounter{hogg}
+\setcounter{hogg}{1}
+\newcommand{\hoggitem}{\textsl{(\thehogg)}\stepcounter{hogg}}
+
 \newcommand{\project}[1]{\textsl{#1}}
 \newcommand{\CLEAN}{\project{CLEAN}}
 \newcommand{\NAELC}{\project{NAELC}}
@@ -29,9 +33,60 @@
 ...Interferometry data have these properties...positive reasons to do
 what we are doing...
 
+...Define visibility, clean beam, dirty beam; also units and
+dimensions...
+
+...For reconstructing a ``best'' image from radio interferometry data,
+he radio world uses \CLEAN--—and an infinite variety of alternatives
+and modifications thereto—--for building radio interferometry maps...
+
 \paragraph{What's wrong with \CLEAN?}
 
-...\CLEAN\ is very wrong...negative reasons to do what we are doing...
+There are many reasons traditional \CLEAN\ needs replacement or
+improvement.  Some of these issues have been addressed in small
+modifications to the traditional method, leading to a zoo of
+baby-\CLEAN s.  The comments below apply only to the most vanilla or
+traditional implementations of \CLEAN, though we know of no widely
+used system that addresses all of these.
+
+\hoggitem~\CLEAN\ is some kind of optimizer, but a heuristic
+optimizer.  That is, there are optimizers out there with better
+properties.  \hoggitem~It is also not optimizing a well-specified (let
+alone justified) scalar objective.  Fergus said ``a conservative
+greedy algorithm'' but with an unknown objective.  Related to this,
+\hoggitem~it requires heuristic decision-making about stopping.  There
+is a sense of things being over-cleaned or under.
+
+\hoggitem~The noise in the final map \CLEAN\ makes can only be
+estimated by measuring variance-like statistics in empty regions.  It
+has no error or noise model and doesn't propagate uncertainties from
+the fundamental visibilities (let alone calibration uncertainties and
+so on).  This blindness to likelihood or noise leads to the problem
+that \hoggitem~\CLEAN can provide no mechanism for producing or
+quantitatively comparing alternative maps.  It produces only a single
+point estimate and no judgement of that estimate or sampling around
+that estimate.  It is a procedure rather than a probabilistic
+framework.  \hoggitem~There is also no mechanism by which the map it
+produces is standardly or by convention projected back into the space
+of visibilities and compared to the raw data to vet or confirm any
+fundamental or even heuristic noise model, or to judge the
+significance of faint sources in the maps it produces.
+
+The final map made by \CLEAN\ is a sum of the clean flux (convolved
+with the clean beam) and the residual flux (which is effectively
+convolved with the dirty beam).  Therefore, \hoggitem~the final map it
+makes has no consistent point-spread function: Some of the flux is
+convolved with the clean beam, and some is convolved with the dirty
+beam.  This means that there is no well-defined point-spread function
+and, perhaps more importantly \hoggitem~the absolute calibration of
+the map is ill-defined.  The units of the map are ``Jy per clean
+beam'' for the bright parts and ``Jy per dirty beam'' for the faint
+parts.
+
+On a more technical level (but equally concerning), \hoggitem~\CLEAN
+requires binning of the visibility data in the $u$--$v$ plane
+(presumably for fastness).  Rix teaches us that ``binning is
+sinning''.
 
 \paragraph{Radio interferometric likelihood}
 
