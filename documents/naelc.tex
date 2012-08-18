@@ -176,15 +176,15 @@ in the catalog.  In the second---the \emph{raster approach}---the
 intensity is modeled by a set of (perhaps trivial) spatially compact
 basis functions arranged in a pre-defined grid in celestial
 coordinates.  In this approach, the only parameters permitted to vary
-are the amplitudes---of the basis functions.  In addition we will
-consider a \emph{hybrid approach} in which the intensity is modeled as
-a sum or mixture of a catalog and a raster, with the catalog taking
-care of the bright, compact sources, and the raster taking care of the
-low-signal-to-noise and extended intensity.  (In some sense, The
-traditional \CLEAN\ procedure produces a hybrid description of the
-intensity, because the bright sources are ``cleaned'' as point sources
-and the faint sources are left behind in the dirty residual expressed
-as a raster image in the intensity domain.)
+are the amplitudes multiplying the basis functions.  In addition we
+will consider a \emph{hybrid approach} in which the intensity is
+modeled as a sum or mixture of a catalog and a raster, with the
+catalog taking care of the bright, compact sources, and the raster
+taking care of the low-signal-to-noise and extended intensity.  In
+some sense, The traditional \CLEAN\ procedure produces a hybrid
+description of the intensity, because the bright sources are
+``cleaned'' as point sources and the faint sources are left behind in
+the dirty residual.
 
 The catalog model makes the intensity a mixture of $M$ objects
 \begin{eqnarray}
