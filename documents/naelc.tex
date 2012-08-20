@@ -12,6 +12,7 @@
 \newcommand{\NAELC}{\project{NAELC}}
 
 \renewcommand{\exp}[1]{e^{#1}}
+\newcommand{\sinc}{\mathrm{sinc}}
 \newcommand{\set}[1]{\left\{{#1}\right\}}
 \newcommand{\given}{\,|\,}
 \newcommand{\expectation}[1]{\tilde{#1}}
@@ -124,22 +125,47 @@ noise temperature of antenna $b_n$, and $T_{ab}$ is an additional
 correlator noise for this baseline.
 
 The generative model for our purposes is as follows: There is a
-time-independent intensity field $I(x,y\given\nu)$ as a function of
-electromagnetic frequency $\nu$, defined in sky coordinates $(x,y)$ or
-the $x$--$y$ plane.  At each $(u_n, v_n)$ sample location in the
-$u$--$v$ plane the expected complex visibility is
+time-independent intensity field $I(l,m\given\nu)$ as a function of
+electromagnetic frequency $\nu$, defined in sky coordinates $(l,m)$ or
+the $l$--$m$ plane.  These sky coordinates $(l, m)$ are to be thought
+of as direction cosines perpendicular to the central line of sight of
+the array.  At each $(u_n, v_n)$ sample location in the $u$--$v$ plane
+the expected complex visibility is
 \begin{eqnarray}
-\expectation{Z}_n &=& \int \psi_a(x,y\given\nu_n)\,\psi_b(x,y\given\nu_n)\,I(x,y\given\nu_n)
-                         \,\exp{-2\pi\,i\,[u_n\,x + v_n\,y]}\,\dd x\,\dd y
+\label{eq:visibility}
+\expectation{Z}_n &=& \int \psi_a(l,m\given\nu_n)\,\psi_b(l,m\given\nu_n)\,I(l,m\given\nu_n)
+                         \,\exp{-2\pi\,i\,[u_n\,l + v_n\,m]}\,\dd l\,\dd m
 \quad ,
 \end{eqnarray}
-(HOGG: work out pre-factors like $\sqrt{\pi}$ etc.) where
-$\psi_a(x,y\given\nu_n)$ is the single-antenna beam pattern for
-antenna $a$ at frequency $\nu_n$, $\psi_b$ is the same for antenna
-$b$, and we have assumed that the electromagnetic frequency bandpass
-$\Delta\nu_n$ is small.
+where $\psi_a(l,m\given\nu_n)$ is the single-antenna beam pattern
+(proportional to the square-root of the effective area) for antenna
+$a$ at frequency $\nu_n$, and $\psi_b()$ is the same for antenna $b$.
+This expression (\ref{eq:visibility}) assumes that the electromagnetic
+frequency bandpass $\Delta\nu_n$ is small; when the bandpass is
+appreciable, there are $\sinc()$ or $\sinc()$-like functions of
+products of the bandpass $\Delta\nu_n$ (a frequency width) and the
+antenna--antenna delay (a time).  This antenna--antenna delay has both
+geometric and delay-line components (that is, the delays between
+telescopes are usually adjusted with delay lines).
+Expression~(\ref{eq:visibility}) also assumes that the relevant
+intensity is close to the central line-of-sight of the array; when the
+antenna beam pattern or relevant intensity spans a large angle on the
+sky, the solid-angle differential $\dd^2\Omega$ becomes
+\begin{eqnarray}
+\dd^2\Omega \equiv \frac{\dd l\,\dd m}{\sqrt{1-l^2-m^2}}
+\quad ,
+\end{eqnarray}
+where $l$ and $m$ are thought of as being in their native units, which
+are the dimensionless outputs of cosine functions.
 
-If the intensity field $I(x,y\given\nu)$ is governed by (a vector,
+In expression~(\ref{eq:visibility}), $\psi_a()$ and $\psi_b()$ are the
+square-roots of what is usually thought of as the single-beam
+point-spread functions.  For reference, equation~(\ref{eq:visibility})
+is the analog of equation~(5.21) in Burke \& Graham-Smith (1997) but
+where they use $\cal{A}(l,m)$ for our product of $\psi()$ functions,
+and they include the geometric correction $\sqrt{1-l^2-m^2}$.
+
+If the intensity field $I(l,m\given\nu)$ is governed by (a vector,
 list, or blob of) parameters $\theta$, then under the Gaussian-noise
 assumption there is a likelihood for those parameters
 \begin{eqnarray}
@@ -186,18 +212,18 @@ description of the intensity, because the bright sources are
 ``cleaned'' as point sources and the faint sources are left behind in
 the dirty residual.
 
-The catalog model makes the intensity a mixture of $M$ objects
+The catalog model makes the intensity a mixture of $J$ objects
 \begin{eqnarray}
-I(x,y\given\nu) &=& \sum_{m=1}^M f_m\,g(x,y\given s_m)
+I(l,m\given\nu) &=& \sum_{j=1}^J f_j\,g(l,m\given s_j)
 \\
-\theta &\equiv& \set{f_m, s_m}_{m=1}^M
+\theta &\equiv& \set{f_j, s_j}_{j=1}^J
 \quad,
 \end{eqnarray}
-where the $f_m$ are object fluxes, the function $g(x,y\given s)$ is a
+where the $f_j$ are object fluxes, the function $g(l,m\given s)$ is a
 function that can generate a family of sources with different
-positions (and shapes), and the $s_m$ are parameter blobs containing
-object positions, shapes, and orientations.  All the fluxes $f_m$ and
-positions and shapes $s_m$ are variable parameters.  The catalog model
+positions (and shapes), and the $s_j$ are parameter blobs containing
+object positions, shapes, and orientations.  All the fluxes $f_j$ and
+positions and shapes $s_j$ are variable parameters.  The catalog model
 is not a general model---it is limited by the number of objects and
 their morphological flexibility---but it is often fast to optimize and
 well-matched to the scientific goals of an imaging project.
@@ -207,50 +233,50 @@ way.
 
 The simplest catalog model is a \emph{mixture of delta-functions}, or
 \begin{eqnarray}
-g(x,y\given s_m) &=& \delta([x-x_m], [y-y_m])
+g(l,m\given s_j) &=& \delta([l-l_j], [m-m_j])
 \\
-s_m &\equiv& \set{x_m, y_m}
+s_j &\equiv& \set{l_j, m_j}
 \quad,
 \end{eqnarray}
-where $\delta()$ is the two-dimensional delta function and $s_m$
+where $\delta()$ is the two-dimensional delta function and $s_j$
 contains only positional information.  Another simple model (really a
 generalization) is the \emph{mixture of Gaussians}, or
 \begin{eqnarray}
-g(x,y\given s_m) &=& \normal(\xi\given\mu_m,V_m)
+g(l,m\given s_j) &=& \normal(\xi\given\mu_j,V_j)
 \\
-\xi &\equiv& \transpose{[x, y]}
+\xi &\equiv& \transpose{[l, m]}
 \\
-\mu_m &\equiv& \transpose{[x_m, y_m]}
+\mu_j &\equiv& \transpose{[l_j, m_j]}
 \\
-s_m &\equiv& \set{x_m, y_m, V_m}
+s_j &\equiv& \set{l_j, m_j, V_j}
 \quad,
 \end{eqnarray}
 where $\normal()$ is here the two-dimensional gaussian, $\xi$ and
-$\mu_m$ are two-dimensional position vectors, $V_m$ is a $2\times 2$
-symmetric positive-definite variance tensor, and $s_m$ thereby
+$\mu_j$ are two-dimensional position vectors, $V_j$ is a $2\times 2$
+symmetric positive-definite variance tensor, and $s_j$ thereby
 contains both positional and shape information.
 
 The raster model also makes the intensity a mixture of basis
 functions, but now we think of having many functions, all identical
 except for positional shifts, and on a fixed grid;
 \begin{eqnarray}
-I(x,y\given\nu) &=& \sum_{k=1}^K a_k\,h_k(x, y)
+I(l,m\given\nu) &=& \sum_{k=1}^K a_k\,h_k(l,m)
 \\
-h_k(x, y) &\equiv& h([x-x_k], [y-y_k])
+h_k(l,m) &\equiv& h([l-l_k], [m-m_k])
 \\
 \theta &\equiv& \set{a_k}_{k=1}^K
 \quad,
 \end{eqnarray}
 where the $a_k$ are raster-element (``pixel'') intensities.  All the
 intensities $a_k$ are variable parameters but the element positions
-$(x_k, y_k)$ are seen as prior information.  The raster model is
+$(l_k, m_k)$ are seen as prior information.  The raster model is
 ``non-parametric'' in that it can represent very strange intensity
 fields, but at the cost of large numbers of parameters.  One can hope
 to keep things convex.
 
 Again, the simplest pixel functions are delta-functions
 \begin{eqnarray}
-h_k(x,y) &=& \delta([x-x_k], [y-y_k])
+h_k(l,m) &=& \delta([l-l_k], [m-m_k])
 \quad,
 \end{eqnarray}
 but there are many other options, including square top-hat functions
@@ -261,10 +287,10 @@ linear least squares; be explicit about the linear algebra...
 
 The hybrid method is more general, being a mixture of the two:
 \begin{eqnarray}
-I(x,y\given\nu) &=& \sum_{m=1}^M f_m\,g(x,y\given s_m)
-                  + \sum_{k=1}^K a_k\,h_k(x, y)
+I(l,m\given\nu) &=& \sum_{j=1}^J f_j\,g(l,m\given s_j)
+                  + \sum_{k=1}^K a_k\,h_k(l,m)
 \\
-\theta &\equiv& \set{\set{f_m, s_m}_{m=1}^M, \set{a_k}_{k=1}^K}
+\theta &\equiv& \set{\set{f_j, s_j}_{j=1}^J, \set{a_k}_{k=1}^K}
 \quad.
 \end{eqnarray}
 Optimization will be difficult because it has all the parameters of
