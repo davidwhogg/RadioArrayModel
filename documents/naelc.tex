@@ -21,6 +21,7 @@
 \newcommand{\normal}{N}
 \newcommand{\Normal}{\normal}
 \newcommand{\transpose}[1]{{#1}^{\!\mathsf{T}}}
+\newcommand{\singlebeam}{\mathrm{sb}}
 
 \begin{document}
 
@@ -154,7 +155,7 @@ intensity is close to the central line-of-sight of the array; when the
 antenna beam pattern or relevant intensity spans a large angle on the
 sky, the solid-angle differential $\dd^2\Omega$ becomes
 \begin{eqnarray}
-\dd^2\Omega \equiv \frac{\dd l\,\dd m}{\sqrt{1-l^2-m^2}}
+\dd^2\Omega &\equiv& \frac{\dd l\,\dd m}{\sqrt{1-l^2-m^2}}
 \quad ,
 \end{eqnarray}
 where $l$ and $m$ are thought of as being in their native units, which
@@ -164,8 +165,20 @@ In expression~(\ref{eq:visibility}), $\psi_a()$ and $\psi_b()$ are the
 square-roots of what is usually thought of as the single-beam
 point-spread functions.  For reference, equation~(\ref{eq:visibility})
 is the analog of equation~(5.21) in Burke \& Graham-Smith (1997) but
-where they use $\mathscr{A}(l,m)$ for our product of $\psi()$ functions,
-and they include the geometric correction $\sqrt{1-l^2-m^2}$.
+where they use $\mathscr{A}(l,m)$ for our product of $\psi()$
+functions, and they include the geometric correction
+$\sqrt{1-l^2-m^2}$.  In the not-uncommon situation that you don't know
+well the single-antenna beam patterns $\psi_a()$ and $\psi_b()$, you
+can think of the interferometer as observing the single-beam
+beam-projected intensity $I\singlebeam(l,m\given\nu_n)$
+\begin{eqnarray}
+I\singlebeam &\equiv& \psi_a(l,m\given\nu_n)\,\psi_b(l,m\given\nu_n)\,I(l,m\given\nu_n)
+\\
+\expectation{Z}_n &=& \int I\singlebeam(l,m\given\nu_n)
+                         \,\exp{-2\pi\,i\,[u_n\,l + v_n\,m]}\,\dd l\,\dd m
+\quad .
+\end{eqnarray}
+This simplifies the inference but complexifies the interpretation.
 
 If the intensity field $I(l,m\given\nu)$ is governed by (a vector,
 list, or blob of) parameters $\theta$, then under the Gaussian-noise
@@ -173,9 +186,9 @@ assumption there is a likelihood for those parameters
 \begin{eqnarray}
 p(Z_n|\theta) &=& \normal(Z_n\given\expectation{Z}_n,\sigma_n^2)
 \\
--2\,\ln p(Z_n|\theta) &=& \frac{[Z_n - \expectation{Z}_n]^2}{\sigma_n^2}
+-2\,\ln p(Z_n|\theta) &=& \ln\sigma_n^2 + \frac{[Z_n - \expectation{Z}_n]^2}{\sigma_n^2}
 \\
--2\,\ln p(D|\theta) &=& \sum_{n=1}^N \frac{[Z_n - \expectation{Z}_n]^2}{\sigma_n^2}
+-2\,\ln p(D|\theta) &=& \sum_{n=1}^N \ln\sigma_n^2 + \sum_{n=1}^N \frac{[Z_n - \expectation{Z}_n]^2}{\sigma_n^2}
 \\
 D &\equiv& \set{Z_n}_{n=1}^N
 \quad ,
@@ -186,7 +199,19 @@ the logarithms, we have assembled all the $Z_n$ into a large data blob
 $D$, and we have assumed that the noise contributions to the $Z_n$ are
 independent.  The likelihood is effectively conditioned on an
 assumption that $(u_n, v_n)$ and $\nu_n$---and our knowledge about
-beam patterns and noise and so on---are reliable.
+beam patterns and noise and so on---are reliable.  However, we did not
+drop the $\ln\sigma_n^2$ terms from the likelihood because we have an
+intuition that we might want to do some variation of what is assumed
+about the $\sigma_n^2$.
+
+Expanding on that point: It is not clear that the real and imaginary
+parts of $Z_n$ will have comparable noise contributions; nor is it
+obvious that the amplitude and phase will have comparable noise
+contributions.  The noise depends on the detailed properties of the
+mixing and correlating electronics.  At this point it remains a
+research project to convert antenna and correlator temperatures into
+(possibly non-trivial) uncertainty variance descriptions in the
+complex plane.  That is one of the points of this project.
 
 \paragraph{Single-dish data}
 
@@ -312,6 +337,18 @@ radio astronomers typically present these intensity models back to the
 community only after re-convolving them with a \emph{clean beam}.  The
 clean beam is some kind of simple (Gaussian, perhaps) beam that has
 the same FWHM properties as the original dirty beam.
+
+\paragraph{Multi-frequency maps}
+
+Most modern interferometers produce many (hundreds) of narrow-band
+freqency channels of data.  These can be used to produce many
+single-channel maps or a single map that integrates together a wide
+frequency bandpass out of the individual narrow channels...different
+goals of kinematic studies and broad-spectrum radio-source studies...
+
+...either combine maps or combine $u$--$v$ information before
+map-making...different possibilities for catalog and raster
+formulations of the problem...
 
 \paragraph{Intensity priors or regularization}
 
