@@ -301,6 +301,16 @@ sense, a hybrid model of the intensity field.  It is not, however, an
 optimal map in any sense, and it does not have consistent beam-shape
 (PSF) properties, as noted above.
 
+One oddity of all of these intensity models is that they are models of
+the \emph{unconvolved} or \emph{infinite-resolution} intensity field.
+That object not only doesn't exist (in Hogg's opinion) but is
+unobservable and uncomparable to any other observation.  For this
+reason, and to avoid ``deconvolution artifacts'' of various kinds,
+radio astronomers typically present these intensity models back to the
+community only after re-convolving them with a \emph{clean beam}.  The
+clean beam is some kind of simple (Gaussian, perhaps) beam that has
+the same FWHM properties as the original dirty beam.
+
 \paragraph{Intensity priors or regularization}
 
 For any model of the intensity field---catalog, raster, or
