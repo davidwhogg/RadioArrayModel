@@ -21,7 +21,6 @@
 \newcommand{\normal}{N}
 \newcommand{\Normal}{\normal}
 \newcommand{\transpose}[1]{{#1}^{\!\mathsf{T}}}
-\newcommand{\singlebeam}{_\mathrm{sb}}
 
 \begin{document}\sloppy\sloppypar
 
@@ -170,12 +169,12 @@ where they use $\mathscr{A}(l,m)$ for our product of $\psi()$
 functions, and they include the geometric correction
 $\sqrt{1-l^2-m^2}$.  In the not-uncommon situation that you don't know
 well the single-antenna beam patterns $\psi_a()$ and $\psi_b()$, you
-can think of the interferometer as observing the single-beam
-beam-projected intensity $I\singlebeam(l,m\given\nu_n)$
+can think of the interferometer as observing the beam-projected
+intensity $I_{ab}(l,m\given\nu_n)$
 \begin{eqnarray}
-I\singlebeam &\equiv& \psi_a(l,m\given\nu_n)\,\psi_b(l,m\given\nu_n)\,I(l,m\given\nu_n)
+I_{ab} &\equiv& \psi_a(l,m\given\nu_n)\,\psi_b(l,m\given\nu_n)\,I(l,m\given\nu_n)
 \\
-\expectation{Z}_n &=& \int I\singlebeam(l,m\given\nu_n)
+\expectation{Z}_n &=& \int I_{ab}(l,m\given\nu_n)
                          \,\exp{-2\pi\,i\,[u_n\,l + v_n\,m]}\,\dd l\,\dd m
 \quad .
 \end{eqnarray}
@@ -350,6 +349,10 @@ goals of kinematic studies and broad-spectrum radio-source studies...
 ...either combine maps or combine $u$--$v$ information before
 map-making...different possibilities for catalog and raster
 formulations of the problem...
+
+...mistakes will be made with \CLEAN\ because the antenna beam pattern
+is a function of frequency...there must be no straightforward solution
+to this without forward modeling...
 
 \paragraph{Intensity priors or regularization}
 
