@@ -383,6 +383,23 @@ that, for the raster components, the major operations are linear
 operations and contain some identical linear-algebra objects at every
 step...
 
+\paragraph{Initialization and optimization}
+
+If we really want to propagate uncertainty properly, we need to sample
+the posterior PDF over intensity models or parameter blobs $\theta$.
+For catalog models of the intensity this sampling is challenging
+because it faces a variable model complexity ($J$ can vary) and
+combinatorial degeneracies (sources can be swapped, leading to
+identical intensities but very different-looking catalogs).  For
+raster models of the intensity this sampling is challenging simply
+because the number of parameters can be exceedingly large; of course
+with some very cleverly designed priors (``cleverly designed'' also
+means ``not informed properly by prior data'' so we don't like these),
+some part of the sampling could be analytic, in principle.  For
+hybrid models, you have the worst of both worlds.
+
+...more to say here, or punt to a later paper?...
+
 \paragraph{Bibliography}
 \begin{trivlist}\raggedright
 \item Burke,~Bernard.~F. \& Graham-Smith, Francis, 1997, \textit{An Introduction to Radio Astronomy}, Cambridge University Press.
